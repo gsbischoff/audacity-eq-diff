@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int
 CountNewLines(char *filename)
 {
 	// Open input
 	FILE *Input = fopen(filename, "r");
-	printf("\ninn");
 
 	if(Input)
 	{
@@ -25,12 +25,12 @@ CountNewLines(char *filename)
 int
 main(int argc, char **argv)
 {
-	if(argc != 3)
+	if(argc < 3)
 		return(0);
 
 	// Read in the two files
-	FILE *InputA = fopen(argv[1], "r");
-	FILE *InputB = fopen(argv[2], "r");
+	FILE *InputA = fopen(argv[1], "r"); int errA = errno;
+	FILE *InputB = fopen(argv[2], "r"); int errB = errno;
 
 	if(InputA && InputB)
 	{
@@ -74,13 +74,18 @@ main(int argc, char **argv)
 
 				count++;
 			}
+			else
+			{
+				printf("Frequencies %f and %f on line %d do not match!\n", freq_a, freq_b, count);
+				return(0);
+			}
 		}
 
 		// Write an XML file for this setting
-		FILE *Output = fopen("output", "w");
+		FILE *Output = fopen(argc == 4 ? argv[3] : "output.XML", "w");
 
-		fprintf(Output, "<equalizationeffect>"
-						"\t<curve name=\"%sTo%s\">\n", argv[1], argv[2]);
+		fprintf(Output, "<equalizationeffect>\n"
+						"\t<curve name=\"%s\">\n", argv[2]);
 
 		for(int i = 0; i < count; ++i)
 		{
@@ -93,6 +98,14 @@ main(int argc, char **argv)
 
 		fflush(Output);
 		fclose(Output);
+	}
+	else
+	{
+		if(!InputA)
+			printf("Error opening file \"%s\": %s\n", argv[1], strerror(errA));
+
+		if(!InputB)
+			printf("Error opening file \"%s\": %s\n", argv[2], strerror(errB));
 	}
 	return(0);
 }
